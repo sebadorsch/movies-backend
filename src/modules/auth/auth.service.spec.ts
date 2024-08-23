@@ -42,6 +42,7 @@ describe('AuthService', (): void => {
           provide: UsersService,
           useValue: {
             getByEmail: jest.fn(),
+            create: jest.fn(),
           },
         },
       ],
@@ -102,5 +103,76 @@ describe('AuthService', (): void => {
         });
       }
     });
+
+    it('should fail creating a new user', async (): Promise<void> => {
+      jest.spyOn(usersService, 'create').mockRejectedValueOnce({});
+
+      try {
+        await authService.signUp(mockUser);
+      } catch (e) {
+        expect(e.status).toEqual(401);
+        expect(e.response).toEqual({
+          message: 'Unauthorized',
+          statusCode: 401,
+        });
+      }
+    });
+
+    it('should create a new user and return it', async (): Promise<void> => {
+      jest.spyOn(usersService, 'create').mockResolvedValueOnce(mockUser);
+
+      const user = await authService.signUp(mockUser);
+
+      expect(user).not.toHaveProperty('password');
+
+      expect(user).toHaveProperty('id')
+      expect(user).toHaveProperty('email')
+      expect(user).toHaveProperty('firstName')
+      expect(user).toHaveProperty('lastName')
+      expect(user).toHaveProperty('role')
+      expect(user).toHaveProperty('accessToken')
+      expect(user).toHaveProperty('refreshToken')
+    })
+  });
+
+  describe('signIn', (): void => {
+    it("should fail when user doesn't exist", async (): Promise<void> => {
+      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser);
+
+      try {
+        await authService.signIn(mockUser.email, mockUser.password);
+      } catch (e) {
+        expect(e.status).toEqual(401);
+        expect(e.response).toEqual({
+          message: 'Unauthorized',
+          statusCode: 401,
+        });
+      }
+    });
+
+    it('should validate the user and return it with the token', async (): Promise<void> => {
+      const mockUser2 = {
+        id: 1,
+        email: 'test@test.com',
+        password: await bcrypt.hash(mockUser.password, 10),
+        firstName: 'first name',
+        lastName: 'last name',
+        role: Role.USER,
+      };
+
+      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser2);
+
+      const user = await authService.signIn(mockUser.email, mockUser.password);
+
+      expect(user).not.toHaveProperty('password');
+
+      expect(user).toHaveProperty('id')
+      expect(user).toHaveProperty('email')
+      expect(user).toHaveProperty('firstName')
+      expect(user).toHaveProperty('lastName')
+      expect(user).toHaveProperty('role')
+      expect(user).toHaveProperty('accessToken')
+      expect(user).toHaveProperty('refreshToken')
+    })
   });
 });

@@ -1,19 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  CallHandler,
+  Controller,
   Delete,
+  ExecutionContext,
+  Get,
   HttpCode,
   HttpStatus,
   Injectable,
-  ExecutionContext,
-  CallHandler,
   NestInterceptor,
-  UseInterceptors,
+  Param,
+  Patch,
+  Post,
+  Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -68,6 +69,14 @@ export class UsersController {
     return (await this.usersService.getAll()) ?? [];
   }
 
+  @HttpCode(HttpStatus.OK)
+  @Get('me')
+  async getMe(@Req() request: Request): Promise<Omit<User, 'password'>> {
+    const { id } = request['user'];
+
+    return await this.usersService.getById(+id);
+  }
+
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Get(':id')
@@ -81,9 +90,13 @@ export class UsersController {
     return user;
   }
 
+  @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Body('id') id: number,
+    @Body() updateUserDto: UpdateUserDto
+  ): Promise<Omit<User, 'password'>> {
     return this.usersService.update(+id, updateUserDto);
   }
 

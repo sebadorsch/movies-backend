@@ -77,12 +77,14 @@ export class AuthService {
   async signIn(email: string, pwd: string): Promise<TokenDto> {
     const validatedUser = await this.validateUser(email, pwd);
 
-    if (!validatedUser) throw new UnauthorizedException();
+    if (!validatedUser)
+      throw new UnauthorizedException();
 
     const { password, ...payload } = validatedUser;
 
     try {
       return {
+        ...payload,
         accessToken: await this.jwtService.signAsync(payload),
         refreshToken: await this.jwtService.signAsync(payload, {
           expiresIn: '1d',
