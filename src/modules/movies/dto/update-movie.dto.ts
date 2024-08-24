@@ -1,18 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsArray, IsInt } from 'class-validator';
 
-export class MovieDto {
+export class UpdateMovieDto {
   @ApiProperty()
-  @IsInt()
-  id: number;
+  @IsOptional()
+  @IsString()
+  title?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  title: string;
-
-  @ApiProperty()
-  @IsString()
-  director: string;
+  director?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -35,40 +33,37 @@ export class MovieDto {
   release_date?: string;
 
   @ApiProperty({ type: [String] })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  species: string[];
+  species?: string[];
 
   @ApiProperty({ type: [String] })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  starships: string[];
+  starships?: string[];
 
   @ApiProperty({ type: [String] })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  vehicles: string[];
+  vehicles?: string[];
 
   @ApiProperty({ type: [String] })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  characters: string[];
+  characters?: string[];
 
   @ApiProperty({ type: [String] })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  planets: string[];
+  planets?: string[];
 
   @ApiProperty()
   @IsOptional()
   @IsString()
   url?: string;
-
-  @ApiProperty()
-  @IsString()
-  created: Date;
-
-  @ApiProperty()
-  @IsString()
-  edited: Date;
 }

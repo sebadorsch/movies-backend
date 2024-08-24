@@ -5,6 +5,7 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from './decorators/public.decorator';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Public()
 @Controller('auth')
@@ -13,7 +14,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('sign-up')
-  async signUp(@Body() user: SignUpDto): Promise<TokenDto> {
+  async signUp(@Body() user: CreateUserDto): Promise<TokenDto> {
     return this.authService.signUp(user);
   }
 

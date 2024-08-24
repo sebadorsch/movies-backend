@@ -8,8 +8,9 @@ import { UsersService } from '../users/users.service';
 import { TokenDto } from './dto/token.dto';
 import { hashPassword } from '../../utils/utils';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, UserDto } from '../users/dto/user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UserDto } from '../users/dto/user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {

@@ -15,7 +15,9 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ROLES } from '../auth/guards/roles';
-import { CreateMovieDto, MovieDto, UpdateMovieDto } from './dto/movie-dto';
+import { MovieDto } from './dto/movie-dto';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { UpdateMovieDto } from './dto/update-movie.dto';
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('movies')
@@ -52,6 +54,8 @@ export class MoviesController {
     @Param('id') id: string,
     @Body() updateMovieDto: UpdateMovieDto,
   ): Promise<MovieDto> {
+    console.log('id:', id);
+    console.log('updateMovieDto:', updateMovieDto);
     return this.moviesService.update(+id, updateMovieDto);
   }
 

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { getFilterParams } from '../../utils/utils';
-import { CreateUserDto, UserDto } from './dto/user.dto';
+import { getFilterParams, hashPassword } from '../../utils/utils';
+import { UserDto } from './dto/user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,14 +12,31 @@ export class UsersService {
   /**
    * Create new user
    *
-   * @param newUser
+   * @param user
    *
    * @returns Promise<UserDto>
    */
-  async create(newUser: CreateUserDto): Promise<UserDto> {
+  async create(user: CreateUserDto): Promise<UserDto> {
     try {
-      return await this.prisma.user.create({ data: newUser });
+      if ((await this.get({ email: user.email })).length)
+        throw new ConflictException(`User already exists`);
+
+      const isHashed =
+        user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
+
+      if (!isHashed) {
+        user.password = await hashPassword(user.password);
+      }
+
+      return await this.prisma.user.create({ data: user });
     } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error creating User',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
     }
   }
 
@@ -58,6 +76,9 @@ export class UsersService {
    */
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     try {
+      if ((await this.get({ id })).length === 0)
+        throw new ConflictException(`User doesn't exist`);
+
       return await this.prisma.user.update({
         where: {
           id,
@@ -67,6 +88,13 @@ export class UsersService {
         },
       });
     } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error updating User',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
     }
   }
 

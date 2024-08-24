@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMovieDto, MovieDto, UpdateMovieDto } from './dto/movie-dto';
+import { MovieDto } from './dto/movie-dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { getFilterParams } from '../../utils/utils';
+import { UpdateMovieDto } from './dto/update-movie.dto';
+import { CreateMovieDto } from './dto/create-movie.dto';
 
 @Injectable()
 export class MoviesService {
@@ -12,7 +14,7 @@ export class MoviesService {
   /**
    * Update Movies db from external API
    */
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_2_HOURS)
   async handleCron(): Promise<void> {
     try {
       console.log('Cron scheduled every 10 minutes: synchronizing movies');
@@ -44,8 +46,7 @@ export class MoviesService {
           data: moviesToCreate,
         });
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /**
@@ -57,9 +58,18 @@ export class MoviesService {
    */
   async create(createMovieDto: CreateMovieDto): Promise<MovieDto> {
     try {
+      if ((await this.get({ episode_id: createMovieDto.episode_id })).length)
+        throw new ConflictException(`Movie already exists`);
+
       return this.prisma.movie.create({ data: createMovieDto });
     } catch (e) {
-      return null;
+      return (
+        e.response ?? {
+          message: 'Error creating movie',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
     }
   }
 
@@ -99,6 +109,8 @@ export class MoviesService {
    */
   async update(id: number, updateMovieDto: UpdateMovieDto): Promise<MovieDto> {
     try {
+      console.log('id:', id);
+      console.log('updateMovieDto:', updateMovieDto);
       return await this.prisma.movie.update({
         where: {
           id,
@@ -108,6 +120,7 @@ export class MoviesService {
         },
       });
     } catch (e) {
+      console.log(e);
     }
   }
 

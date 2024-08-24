@@ -1,6 +1,7 @@
 import {
   Body,
   CallHandler,
+  ConflictException,
   Controller,
   Delete,
   ExecutionContext,
@@ -17,7 +18,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { map, Observable } from 'rxjs';
 import * as _ from 'lodash';
 import { GeneralMessageResponseDto } from './dto/general-message-response.dto';
@@ -25,7 +25,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { ROLES } from '../auth/guards/roles';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { CreateUserDto, UserDto } from './dto/user.dto';
+import { UserDto } from './dto/user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { hashPassword } from '../../utils/utils';
 
 @Injectable()
 export class ExcludePasswordInterceptor implements NestInterceptor {
@@ -58,7 +61,11 @@ export class UsersController {
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<Omit<UserDto, 'password'>> {
-    return await this.usersService.create(createUserDto);
+    try {
+      return await this.usersService.create(createUserDto);
+    } catch (e) {
+      throw new ConflictException(`Error`);
+    }
   }
 
   @Roles(ROLES.ADMIN)
@@ -95,7 +102,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
   async update(
-    @Body('id') id: number,
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<Omit<UserDto, 'password'>> {
     return this.usersService.update(+id, updateUserDto);

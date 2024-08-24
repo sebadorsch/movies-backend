@@ -27,7 +27,7 @@ model Movie {
   id            Int      @id @default(autoincrement())
   title         String
   director      String
-  episode_id    Int?
+  episode_id    Int      @unique
   opening_crawl String?
   producer      String?
   release_date  String?

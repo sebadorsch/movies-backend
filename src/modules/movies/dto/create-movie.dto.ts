@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsArray, IsInt } from 'class-validator';
 
-export class MovieDto {
-  @ApiProperty()
-  @IsInt()
-  id: number;
-
+export class CreateMovieDto {
   @ApiProperty()
   @IsString()
   title: string;
@@ -17,7 +13,7 @@ export class MovieDto {
   @ApiProperty()
   @IsOptional()
   @IsInt()
-  episode_id?: number;
+  episode_id: number;
 
   @ApiProperty()
   @IsOptional()
@@ -63,12 +59,4 @@ export class MovieDto {
   @IsOptional()
   @IsString()
   url?: string;
-
-  @ApiProperty()
-  @IsString()
-  created: Date;
-
-  @ApiProperty()
-  @IsString()
-  edited: Date;
 }
