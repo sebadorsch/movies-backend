@@ -11,12 +11,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
-import { CreateMovieDto } from './dto/create-movie.dto';
-import { UpdateMovieDto } from './dto/update-movie.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ROLES } from '../auth/guards/roles';
+import { CreateMovieDto, MovieDto, UpdateMovieDto } from './dto/movie-dto';
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('movies')
@@ -26,33 +25,40 @@ export class MoviesController {
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Post()
-  set(@Body() createMovieDto: CreateMovieDto) {
-    return this.moviesService.create(createMovieDto);
+  async create(@Body() createMovieDto: CreateMovieDto): Promise<MovieDto> {
+    try {
+      return this.moviesService.create(createMovieDto);
+    } catch (e) {
+      return null;
+    }
   }
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  getAll() {
-    return this.moviesService.findAll();
+  async get(@Body() movieParams: Partial<MovieDto>): Promise<MovieDto[]> {
+    return this.moviesService.get(movieParams);
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  get(@Param('id') id: string) {
-    return this.moviesService.findOne(+id);
+  async getBtId(@Param('id') id: number): Promise<MovieDto> {
+    return this.moviesService.getById(+id);
   }
 
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateMovieDto: UpdateMovieDto,
+  ): Promise<MovieDto> {
     return this.moviesService.update(+id, updateMovieDto);
   }
 
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<MovieDto> {
     return this.moviesService.remove(+id);
   }
 }

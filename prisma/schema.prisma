@@ -24,19 +24,19 @@ enum Role {
 }
 
 model Movie {
-  id            Int       @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   title         String
   director      String
   episode_id    Int?
   opening_crawl String?
   producer      String?
-  release_date  DateTime?
+  release_date  String?
   species       String[]
   starships     String[]
   vehicles      String[]
   characters    String[]
   planets       String[]
   url           String?
-  created       DateTime  @default(now())
-  edited        DateTime  @default(now())
+  created       DateTime @default(now())
+  edited        DateTime @default(now())
 }

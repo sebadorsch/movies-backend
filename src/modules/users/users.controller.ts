@@ -17,9 +17,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './users.model';
 import { map, Observable } from 'rxjs';
 import * as _ from 'lodash';
 import { GeneralMessageResponseDto } from './dto/general-message-response.dto';
@@ -27,6 +25,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { ROLES } from '../auth/guards/roles';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { CreateUserDto, UserDto } from './dto/user.dto';
 
 @Injectable()
 export class ExcludePasswordInterceptor implements NestInterceptor {
@@ -56,22 +55,24 @@ export class UsersController {
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Post()
-  async set(
+  async create(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<Omit<UserDto, 'password'>> {
     return await this.usersService.create(createUserDto);
   }
 
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Get()
-  async getAll(): Promise<Omit<User, 'password'>[]> {
-    return (await this.usersService.getAll()) ?? [];
+  async get(
+    @Body() userParams: Partial<UserDto>,
+  ): Promise<Omit<UserDto, 'password'>[]> {
+    return (await this.usersService.get(userParams)) ?? [];
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('me')
-  async getMe(@Req() request: Request): Promise<Omit<User, 'password'>> {
+  async getMe(@Req() request: Request): Promise<Omit<UserDto, 'password'>> {
     const { id } = request['user'];
 
     return await this.usersService.getById(+id);
@@ -80,9 +81,9 @@ export class UsersController {
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  async get(
+  async getById(
     @Param('id') id: string,
-  ): Promise<Omit<User, 'password'> | GeneralMessageResponseDto> {
+  ): Promise<Omit<UserDto, 'password'> | GeneralMessageResponseDto> {
     const user = await this.usersService.getById(+id);
 
     if (_.isEmpty(user)) return { message: 'User not found' };
@@ -95,15 +96,15 @@ export class UsersController {
   @Patch(':id')
   async update(
     @Body('id') id: number,
-    @Body() updateUserDto: UpdateUserDto
-  ): Promise<Omit<User, 'password'>> {
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<Omit<UserDto, 'password'>> {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<any> {
+  async remove(@Param('id') id: string): Promise<UserDto> {
     return this.usersService.remove(+id);
   }
 }

@@ -5,11 +5,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { TokenDto } from './dto/token.dto';
 import { hashPassword } from '../../utils/utils';
 import * as bcrypt from 'bcrypt';
-import { UserDto } from '../users/dto/user.dto';
+import { CreateUserDto, UserDto } from '../users/dto/user.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
@@ -28,7 +27,7 @@ export class AuthService {
    * @returns Promise<UserDto>
    */
   async validateUser(email: string, password: string): Promise<UserDto | null> {
-    const user: UserDto = await this.usersService.getByEmail(email);
+    const user: UserDto = (await this.usersService.get({ email }))[0];
 
     if (user && (await bcrypt.compare(password, user.password))) {
       return user;
@@ -45,7 +44,7 @@ export class AuthService {
    * @returns Promise<SignInDto>
    */
   async signUp(user: CreateUserDto): Promise<TokenDto> {
-    if (await this.usersService.getByEmail(user.email))
+    if (await this.usersService.get({ email: user.email }))
       throw new ConflictException(`User already exists`);
 
     try {
@@ -77,8 +76,7 @@ export class AuthService {
   async signIn(email: string, pwd: string): Promise<TokenDto> {
     const validatedUser = await this.validateUser(email, pwd);
 
-    if (!validatedUser)
-      throw new UnauthorizedException();
+    if (!validatedUser) throw new UnauthorizedException();
 
     const { password, ...payload } = validatedUser;
 
@@ -108,7 +106,9 @@ export class AuthService {
 
       const decodedToken = await this.jwtService.verifyAsync(refreshToken);
 
-      const user = await this.usersService.getByEmail(decodedToken.email);
+      const user = (
+        await this.usersService.get({ email: decodedToken.email })
+      )[0];
 
       if (!user)
         throw new UnauthorizedException('Invalid or expired refresh token');

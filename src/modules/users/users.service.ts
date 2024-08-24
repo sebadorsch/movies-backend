@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from './users.model';
+import { getFilterParams } from '../../utils/utils';
+import { CreateUserDto, UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,23 +13,26 @@ export class UsersService {
    *
    * @param newUser
    *
-   * @returns Promise<User>
+   * @returns Promise<UserDto>
    */
-  async create(newUser: CreateUserDto): Promise<User> {
+  async create(newUser: CreateUserDto): Promise<UserDto> {
     try {
       return await this.prisma.user.create({ data: newUser });
     } catch (e) {
-      console.log(e);
     }
   }
 
   /**
-   * Get all Users
+   * Get filtered or all Users
    *
-   * @returns Promise<User[]>
+   * @returns Promise<UserDto[]>
    */
-  async getAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async get(filterParams: Partial<UserDto>): Promise<UserDto[]> {
+    const filters = getFilterParams(filterParams);
+
+    return this.prisma.user.findMany({
+      where: filters,
+    });
   }
 
   /**
@@ -37,29 +40,12 @@ export class UsersService {
    *
    * @param id
    *
-   * @returns Promise<User[]>
+   * @returns Promise<UserDto[]>
    */
-  async getById(id: number): Promise<User> {
+  async getById(id: number): Promise<UserDto> {
     return this.prisma.user.findUnique({
       where: { id },
     });
-  }
-
-  /**
-   * Get a User by email
-   *
-   * @param email
-   *
-   * @returns Promise<User>
-   */
-  async getByEmail(email: string): Promise<User> {
-    try {
-      return this.prisma.user.findUnique({
-        where: { email },
-      });
-    } catch (e) {
-      console.log(e);
-    }
   }
 
   /**
@@ -68,9 +54,9 @@ export class UsersService {
    * @param id
    * @param updateUserDto
    *
-   * @returns Promise<User[]>
+   * @returns Promise<UserDto[]>
    */
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     try {
       return await this.prisma.user.update({
         where: {
@@ -81,7 +67,6 @@ export class UsersService {
         },
       });
     } catch (e) {
-      console.log(e);
     }
   }
 
@@ -90,9 +75,9 @@ export class UsersService {
    *
    * @param id
    *
-   * @returns Promise<User[]>
+   * @returns Promise<User>
    */
-  async remove(id: number): Promise<any> {
+  async remove(id: number): Promise<UserDto> {
     return this.prisma.user.delete({
       where: { id },
     });

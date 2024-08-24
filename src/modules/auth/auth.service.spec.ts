@@ -62,7 +62,7 @@ describe('AuthService', (): void => {
 
   describe('validateUser', (): void => {
     it('should fail when passwords are different', async (): Promise<void> => {
-      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
 
       const result = await authService.validateUser(
         mockCreatedUser.email,
@@ -77,7 +77,7 @@ describe('AuthService', (): void => {
     it('should find the user and validate it', async (): Promise<void> => {
       mockUser.password = await bcrypt.hash(mockUser.password, 10);
 
-      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
 
       const result = await authService.validateUser(
         mockCreatedUser.email,
@@ -90,7 +90,7 @@ describe('AuthService', (): void => {
 
   describe('signUp', (): void => {
     it('should fail when email already exists', async (): Promise<void> => {
-      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
 
       try {
         await authService.signUp(mockUser);
@@ -125,19 +125,19 @@ describe('AuthService', (): void => {
 
       expect(user).not.toHaveProperty('password');
 
-      expect(user).toHaveProperty('id')
-      expect(user).toHaveProperty('email')
-      expect(user).toHaveProperty('firstName')
-      expect(user).toHaveProperty('lastName')
-      expect(user).toHaveProperty('role')
-      expect(user).toHaveProperty('accessToken')
-      expect(user).toHaveProperty('refreshToken')
-    })
+      expect(user).toHaveProperty('id');
+      expect(user).toHaveProperty('email');
+      expect(user).toHaveProperty('firstName');
+      expect(user).toHaveProperty('lastName');
+      expect(user).toHaveProperty('role');
+      expect(user).toHaveProperty('accessToken');
+      expect(user).toHaveProperty('refreshToken');
+    });
   });
 
   describe('signIn', (): void => {
     it("should fail when user doesn't exist", async (): Promise<void> => {
-      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
 
       try {
         await authService.signIn(mockUser.email, mockUser.password);
@@ -160,19 +160,19 @@ describe('AuthService', (): void => {
         role: Role.USER,
       };
 
-      jest.spyOn(usersService, 'getByEmail').mockResolvedValueOnce(mockUser2);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser2]);
 
       const user = await authService.signIn(mockUser.email, mockUser.password);
 
       expect(user).not.toHaveProperty('password');
 
-      expect(user).toHaveProperty('id')
-      expect(user).toHaveProperty('email')
-      expect(user).toHaveProperty('firstName')
-      expect(user).toHaveProperty('lastName')
-      expect(user).toHaveProperty('role')
-      expect(user).toHaveProperty('accessToken')
-      expect(user).toHaveProperty('refreshToken')
-    })
+      expect(user).toHaveProperty('id');
+      expect(user).toHaveProperty('email');
+      expect(user).toHaveProperty('firstName');
+      expect(user).toHaveProperty('lastName');
+      expect(user).toHaveProperty('role');
+      expect(user).toHaveProperty('accessToken');
+      expect(user).toHaveProperty('refreshToken');
+    });
   });
 });
