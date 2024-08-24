@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import * as utils from '../../utils/utils';
 
 describe('AuthService', (): void => {
   let authService: AuthService;

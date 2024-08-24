@@ -1,6 +1,4 @@
-import { IsString, IsEmpty, IsEmail } from 'class-validator';
-import { Role } from '@prisma/client';
-import { SignInDto } from './sign-in.dto';
+import { IsString, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignUpDto {

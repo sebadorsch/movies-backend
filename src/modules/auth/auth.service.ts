@@ -50,7 +50,7 @@ export class AuthService {
 
     try {
       user.password = await hashPassword(user.password);
-      console.log(user)
+      console.log(user);
 
       const createdUser = await this.usersService.create(user);
       const { password, ...payload } = createdUser;
