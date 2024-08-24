@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import * as utils from '../../utils/utils';
 
 describe('AuthService', (): void => {
   let authService: AuthService;
@@ -26,6 +27,8 @@ describe('AuthService', (): void => {
     firstName: 'first name',
     lastName: 'last name',
     role: Role.USER,
+    createdAt: new Date('2024-08-24T17:59:48.623Z'),
+    updatedAt: new Date('2024-08-24T17:59:48.623Z'),
   };
 
   beforeEach(async (): Promise<void> => {
@@ -43,6 +46,7 @@ describe('AuthService', (): void => {
           useValue: {
             getByEmail: jest.fn(),
             create: jest.fn(),
+            get: jest.fn(),
           },
         },
       ],
@@ -105,7 +109,7 @@ describe('AuthService', (): void => {
     });
 
     it('should fail creating a new user', async (): Promise<void> => {
-      jest.spyOn(usersService, 'create').mockRejectedValueOnce({});
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([]);
 
       try {
         await authService.signUp(mockUser);
@@ -119,6 +123,7 @@ describe('AuthService', (): void => {
     });
 
     it('should create a new user and return it', async (): Promise<void> => {
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([]);
       jest.spyOn(usersService, 'create').mockResolvedValueOnce(mockUser);
 
       const user = await authService.signUp(mockUser);

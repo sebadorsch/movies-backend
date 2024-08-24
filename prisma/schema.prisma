@@ -14,8 +14,8 @@ model User {
   role      Role     @default(USER)
   firstName String?
   lastName  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  created   DateTime @default(now())
+  edited    DateTime @default(now())
 }
 
 enum Role {

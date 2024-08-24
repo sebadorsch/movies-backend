@@ -19,7 +19,7 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<UserDto> {
     try {
       if ((await this.get({ email: user.email })).length)
-        throw new ConflictException(`User already exists`);
+        throw new ConflictException(`User already exists!`);
 
       const isHashed =
         user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
@@ -46,11 +46,21 @@ export class UsersService {
    * @returns Promise<UserDto[]>
    */
   async get(filterParams: Partial<UserDto>): Promise<UserDto[]> {
-    const filters = getFilterParams(filterParams);
+    try {
+      const filters = getFilterParams(filterParams);
 
-    return this.prisma.user.findMany({
-      where: filters,
-    });
+      return this.prisma.user.findMany({
+        where: filters,
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error getting User',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 
   /**
@@ -61,9 +71,19 @@ export class UsersService {
    * @returns Promise<UserDto[]>
    */
   async getById(id: number): Promise<UserDto> {
-    return this.prisma.user.findUnique({
-      where: { id },
-    });
+    try {
+      return this.prisma.user.findUnique({
+        where: { id },
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error getting User',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 
   /**
@@ -85,6 +105,7 @@ export class UsersService {
         },
         data: {
           ...updateUserDto,
+          edited: new Date(),
         },
       });
     } catch (e) {
@@ -106,8 +127,18 @@ export class UsersService {
    * @returns Promise<User>
    */
   async remove(id: number): Promise<UserDto> {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+    try {
+      return this.prisma.user.delete({
+        where: { id },
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error getting User',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 }

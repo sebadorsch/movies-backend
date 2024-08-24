@@ -45,11 +45,12 @@ export class AuthService {
    * @returns Promise<SignInDto>
    */
   async signUp(user: CreateUserDto): Promise<TokenDto> {
-    if (await this.usersService.get({ email: user.email }))
+    if ((await this.usersService.get({ email: user.email })).length)
       throw new ConflictException(`User already exists`);
 
     try {
       user.password = await hashPassword(user.password);
+      console.log(user)
 
       const createdUser = await this.usersService.create(user);
       const { password, ...payload } = createdUser;

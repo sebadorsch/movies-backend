@@ -79,11 +79,21 @@ export class MoviesService {
    * @returns Promise<MovieDto[]>
    */
   async get(filterParams: Partial<MovieDto>): Promise<MovieDto[]> {
-    const filters = getFilterParams(filterParams);
+    try {
+      const filters = getFilterParams(filterParams);
 
-    return this.prisma.movie.findMany({
-      where: filters,
-    });
+      return this.prisma.movie.findMany({
+        where: filters,
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error getting movie',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 
   /**
@@ -94,9 +104,19 @@ export class MoviesService {
    * @returns Promise<MovieDto[]>
    */
   async getById(id: number): Promise<MovieDto> {
-    return this.prisma.movie.findUnique({
-      where: { id },
-    });
+    try {
+      return this.prisma.movie.findUnique({
+        where: { id },
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error getting movie',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 
   /**
@@ -109,18 +129,23 @@ export class MoviesService {
    */
   async update(id: number, updateMovieDto: UpdateMovieDto): Promise<MovieDto> {
     try {
-      console.log('id:', id);
-      console.log('updateMovieDto:', updateMovieDto);
       return await this.prisma.movie.update({
         where: {
           id,
         },
         data: {
           ...updateMovieDto,
+          edited: new Date(),
         },
       });
     } catch (e) {
-      console.log(e);
+      return (
+        e.response ?? {
+          message: 'Error updating movie',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
     }
   }
 
@@ -132,8 +157,18 @@ export class MoviesService {
    * @returns Promise<MovieDto>
    */
   async remove(id: number): Promise<MovieDto> {
-    return this.prisma.movie.delete({
-      where: { id },
-    });
+    try {
+      return this.prisma.movie.delete({
+        where: { id },
+      });
+    } catch (e) {
+      return (
+        e.response ?? {
+          message: 'Error deleting movie',
+          error: 'Conflict',
+          statusCode: 409,
+        }
+      );
+    }
   }
 }
