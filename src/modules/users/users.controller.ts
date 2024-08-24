@@ -28,7 +28,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { hashPassword } from '../../utils/utils';
 
 @Injectable()
 export class ExcludePasswordInterceptor implements NestInterceptor {
