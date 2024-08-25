@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MovieDto } from './dto/movie-dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -9,6 +9,8 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 
 @Injectable()
 export class MoviesService {
+  private readonly logger = new Logger();
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -46,7 +48,9 @@ export class MoviesService {
           data: moviesToCreate,
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   /**
@@ -63,6 +67,7 @@ export class MoviesService {
 
       return this.prisma.movie.create({ data: createMovieDto });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error creating movie',
@@ -86,6 +91,7 @@ export class MoviesService {
         where: filters,
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error getting movie',
@@ -109,6 +115,7 @@ export class MoviesService {
         where: { id },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error getting movie',
@@ -139,6 +146,7 @@ export class MoviesService {
         },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error updating movie',
@@ -162,6 +170,7 @@ export class MoviesService {
         where: { id },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error deleting movie',

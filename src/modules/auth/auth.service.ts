@@ -93,6 +93,7 @@ export class AuthService {
         }),
       };
     } catch (e) {
+      this.logger.error(e);
       throw new UnauthorizedException();
     }
   }
@@ -126,6 +127,7 @@ export class AuthService {
         }),
       };
     } catch (e) {
+      this.logger.error(e);
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }

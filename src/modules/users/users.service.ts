@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { getFilterParams, hashPassword } from '../../utils/utils';
 import { UserDto } from './dto/user.dto';
@@ -7,6 +7,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger();
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -30,6 +32,7 @@ export class UsersService {
 
       return await this.prisma.user.create({ data: user });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error creating User',
@@ -53,6 +56,7 @@ export class UsersService {
         where: filters,
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error getting User',
@@ -76,6 +80,7 @@ export class UsersService {
         where: { id },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error getting User',
@@ -109,6 +114,7 @@ export class UsersService {
         },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error updating User',
@@ -132,6 +138,7 @@ export class UsersService {
         where: { id },
       });
     } catch (e) {
+      this.logger.error(e);
       return (
         e.response ?? {
           message: 'Error getting User',
