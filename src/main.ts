@@ -33,7 +33,7 @@ async function bootstrap() {
 
   const appPort = process.env.PORT ?? 3000;
 
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('', app, document);
 
   await app.listen(appPort);
   console.log('🚀 Server ready at port:', appPort);
