@@ -17,11 +17,11 @@ export class MoviesService {
   @Cron(CronExpression.EVERY_2_HOURS)
   async handleCron(): Promise<void> {
     try {
-      console.log('Cron scheduled every 10 minutes: synchronizing movies');
+      console.log('Cron scheduled every 10 minutes: synchronizing movies from ' + `${process.env.BASE_MOVIES_URL ?? 'https://swapi.dev/api'}/films`);
 
       const {
         data: { results },
-      } = await axios.get(`${process.env.BASE_MOVIES_URL}/films`);
+      } = await axios.get(`${process.env.BASE_MOVIES_URL ?? 'https://swapi.dev/api'}/films`);
 
       const existingMovies = await this.prisma.movie.findMany({
         where: {
