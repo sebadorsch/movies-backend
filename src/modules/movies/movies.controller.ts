@@ -18,7 +18,9 @@ import { ROLES } from '../auth/guards/roles';
 import { MovieDto } from './dto/movie-dto';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Movies')
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('movies')
 export class MoviesController {

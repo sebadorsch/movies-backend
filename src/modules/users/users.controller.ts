@@ -28,6 +28,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Injectable()
 export class ExcludePasswordInterceptor implements NestInterceptor {
@@ -48,6 +49,7 @@ export class ExcludePasswordInterceptor implements NestInterceptor {
   }
 }
 
+@ApiTags('Users')
 @UseGuards(AuthGuard, RolesGuard)
 @UseInterceptors(ExcludePasswordInterceptor)
 @Controller('users')
