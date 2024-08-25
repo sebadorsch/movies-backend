@@ -7,24 +7,12 @@ import * as process from 'node:process';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const whiteList = ['*'];
-
-  const corsOptions = {
-    origin: (origin, callback) => {
-      console.log('Origin:', origin);
-      if (!origin || whiteList.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-  };
+  });
 
-  app.enableCors(corsOptions);
-
-  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
