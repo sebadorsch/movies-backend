@@ -1,6 +1,6 @@
 import {
   ConflictException,
-  Injectable,
+  Injectable, Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +14,8 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger();
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -50,7 +52,6 @@ export class AuthService {
 
     try {
       user.password = await hashPassword(user.password);
-      console.log(user);
 
       const createdUser = await this.usersService.create(user);
       const { password, ...payload } = createdUser;
@@ -63,6 +64,7 @@ export class AuthService {
         }),
       };
     } catch (e) {
+      this.logger.error(e);
       throw new UnauthorizedException();
     }
   }

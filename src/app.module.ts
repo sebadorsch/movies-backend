@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
@@ -23,6 +23,7 @@ import { ScheduleModule } from '@nestjs/schedule';
   ],
   controllers: [],
   providers: [
+    Logger,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

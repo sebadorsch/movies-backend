@@ -54,8 +54,6 @@ export class MoviesController {
     @Param('id') id: string,
     @Body() updateMovieDto: UpdateMovieDto,
   ): Promise<MovieDto> {
-    console.log('id:', id);
-    console.log('updateMovieDto:', updateMovieDto);
     return this.moviesService.update(+id, updateMovieDto);
   }
 
