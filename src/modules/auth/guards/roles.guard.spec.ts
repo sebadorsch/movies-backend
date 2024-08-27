@@ -90,7 +90,24 @@ describe('RolesGuard', (): void => {
       ).toThrow(UnauthorizedException);
     });
 
-    it.skip('should return true if user is an admin, regardless of roles defined', (): void => {
+    it('should return true if user role matches one of the required roles', (): void => {
+      reflector.get = jest
+        .fn()
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce([ROLES.USER]);
+
+      const context = {
+        switchToHttp: () => ({
+          getRequest: () => ({ user: { role: ROLES.USER } }),
+        }),
+        getHandler: () => jest.fn(),
+        getClass: () => jest.fn(),
+      } as unknown as ExecutionContext;
+
+      expect(rolesGuard.canActivate(context)).toBe(true);
+    });
+
+    it('should return true if user role is authorized and not admin', (): void => {
       reflector.get = jest
         .fn()
         .mockReturnValueOnce(false)
@@ -99,7 +116,7 @@ describe('RolesGuard', (): void => {
 
       const context = {
         switchToHttp: () => ({
-          getRequest: () => ({ user: { role: ROLES.ADMIN } }),
+          getRequest: () => ({ user: { role: ROLES.USER } }),
         }),
         getHandler: () => jest.fn(),
         getClass: () => jest.fn(),
