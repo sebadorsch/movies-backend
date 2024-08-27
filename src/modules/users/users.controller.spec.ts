@@ -102,8 +102,28 @@ describe('UsersController', (): void => {
   });
 
   describe('getMe', (): void => {
-    //Todo
+    it('should return the current user without password', async (): Promise<void> => {
+      const mockRequest = {
+        user: { id: 1 },
+      };
+
+      const result: Omit<UserDto, 'password'> = {
+        id: 1,
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: 'USER',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockUsersService.getById.mockResolvedValue(result);
+
+      expect(await userController.getMe(mockRequest as any)).toEqual(result);
+      expect(mockUsersService.getById).toHaveBeenCalledWith(1);
+    });
   });
+
 
   describe('getById', (): void => {
     it('should return a user by id without password', async (): Promise<void> => {
