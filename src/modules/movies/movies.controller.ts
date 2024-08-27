@@ -51,6 +51,7 @@ export class MoviesController {
     return this.moviesService.get(movieParams);
   }
 
+  @Roles(ROLES.USER)
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getBtId(
