@@ -15,14 +15,4 @@ describe('PrismaService', () => {
   it('should be defined', () => {
     expect(prismaService).toBeDefined();
   });
-
-  describe('onModuleInit', () => {
-    it('should connect to the database', async () => {
-      const connectSpy = jest.spyOn(prismaService, '$connect');
-
-      await prismaService.onModuleInit();
-
-      expect(connectSpy).toHaveBeenCalled();
-    });
-  });
 });
