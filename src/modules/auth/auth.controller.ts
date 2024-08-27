@@ -25,7 +25,6 @@ export class AuthController {
     return this.authService.signIn(user.email, user.password);
   }
 
-  //ToDo: verify
   @HttpCode(HttpStatus.OK)
   @Post('refresh-token')
   async refreshToken(@Body() refreshToken: RefreshTokenDto): Promise<TokenDto> {

@@ -85,7 +85,6 @@ describe('RolesGuard', (): void => {
         return null;
       });
 
-      // Act & Assert: Expect UnauthorizedException to be thrown
       expect(() =>
         rolesGuard.canActivate(mockExecutionContext as ExecutionContext),
       ).toThrow(UnauthorizedException);

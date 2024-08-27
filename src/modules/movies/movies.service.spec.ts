@@ -230,7 +230,7 @@ describe('MoviesService', (): void => {
       expect(result).toEqual(movieMock);
     });
 
-    it.skip('should throw an exception if no movie is found to delete', async (): Promise<void> => {
+    it('should throw an exception if no movie is found to delete', async (): Promise<void> => {
       prisma.movie.delete = jest
         .fn()
         .mockRejectedValue(new Error('Movie not found'));

@@ -102,28 +102,7 @@ describe('UsersController', (): void => {
   });
 
   describe('getMe', (): void => {
-    // it.skip('should return the user without password', async () => {
-    //   const mockRequest = {
-    //     user: {
-    //       id: '1',
-    //     },
-    //   } as Partial<Request> & { user: { id: string } };
-    //
-    //   const result: Omit<UserDto, 'password'> = {
-    //     id: 1,
-    //     email: 'test@example.com',
-    //     firstName: 'John',
-    //     lastName: 'Doe',
-    //     role: 'USER',
-    //     createdAt: new Date(),
-    //     updatedAt: new Date(),
-    //   };
-    //
-    //
-    //   mockUsersService.getById.mockResolvedValue(result);
-    //
-    //   expect(await userController.getMe(mockRequest)).toEqual(result);
-    // });
+    //Todo
   });
 
   describe('getById', (): void => {
