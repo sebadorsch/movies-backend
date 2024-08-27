@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MoviesService } from './movies.service';
 import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
-import { ConflictException, HttpException } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 
 jest.mock('axios');

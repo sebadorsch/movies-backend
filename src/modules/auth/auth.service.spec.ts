@@ -216,14 +216,20 @@ describe('AuthService', (): void => {
         refreshToken: 'new_refresh_token',
       };
 
-      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValueOnce(mockDecodedToken);
+      jest
+        .spyOn(jwtService, 'verifyAsync')
+        .mockResolvedValueOnce(mockDecodedToken);
       jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
-      jest.spyOn(jwtService, 'signAsync').mockResolvedValueOnce(mockTokenDto.accessToken)
+      jest
+        .spyOn(jwtService, 'signAsync')
+        .mockResolvedValueOnce(mockTokenDto.accessToken)
         .mockResolvedValueOnce(mockTokenDto.refreshToken);
 
       const result = await authService.refreshToken(refreshTokenDto);
 
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith(refreshTokenDto.refreshToken);
+      expect(jwtService.verifyAsync).toHaveBeenCalledWith(
+        refreshTokenDto.refreshToken,
+      );
       expect(jwtService.signAsync).toHaveBeenCalledWith(
         expect.objectContaining({
           id: mockUser.id,
@@ -232,7 +238,7 @@ describe('AuthService', (): void => {
           firstName: mockUser.firstName,
           lastName: mockUser.lastName,
         }),
-        { expiresIn: '1d' }
+        { expiresIn: '1d' },
       );
 
       expect(result).toEqual(mockTokenDto);

@@ -47,8 +47,8 @@ describe('UsersService', (): void => {
         firstName: null,
         lastName: null,
         created: new Date(),
-        edited: new Date()
-      }
+        edited: new Date(),
+      };
 
       jest.spyOn(service, 'get').mockResolvedValue([]);
       (hashPassword as jest.Mock).mockResolvedValue(hashedPassword);
@@ -83,7 +83,7 @@ describe('UsersService', (): void => {
       jest.spyOn(service, 'get').mockResolvedValue([existingUser]);
 
       try {
-        await service.create(createUserDto)
+        await service.create(createUserDto);
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
         expect(e.response).toBe('User already exists');
@@ -107,7 +107,7 @@ describe('UsersService', (): void => {
           firstName: null,
           lastName: null,
           created: new Date(),
-          edited: new Date()
+          edited: new Date(),
         },
       ];
       jest.spyOn(prisma.user, 'findMany').mockResolvedValue(users);
@@ -128,7 +128,7 @@ describe('UsersService', (): void => {
       jest.spyOn(prisma.user, 'findMany').mockResolvedValue([]);
 
       try {
-        await service.get({ email: 'nonexistent@example.com' })
+        await service.get({ email: 'nonexistent@example.com' });
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
         expect(e.response).toBe('User already exists');
@@ -149,7 +149,7 @@ describe('UsersService', (): void => {
         createdAt: new Date(),
         updatedAt: new Date(),
         created: new Date(),
-        edited: new Date()
+        edited: new Date(),
       };
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(userDto);
 
@@ -162,7 +162,7 @@ describe('UsersService', (): void => {
     it('should throw NotFoundException if user not found', async (): Promise<void> => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
       try {
-        await service.getById(1)
+        await service.getById(1);
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
         expect(e.response).toBe('User not found');
@@ -187,7 +187,7 @@ describe('UsersService', (): void => {
         createdAt: new Date(),
         updatedAt: new Date(),
         created: new Date(),
-        edited: new Date()
+        edited: new Date(),
       };
 
       jest.spyOn(service, 'get').mockResolvedValue([userDto]);
@@ -207,7 +207,7 @@ describe('UsersService', (): void => {
 
       jest.spyOn(service, 'get').mockResolvedValue([]);
       try {
-        await service.update(1, updateUserDto)
+        await service.update(1, updateUserDto);
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
         expect(e.response).toBe('User not found');
@@ -227,7 +227,7 @@ describe('UsersService', (): void => {
         firstName: null,
         lastName: null,
         created: new Date(),
-        edited: new Date()
+        edited: new Date(),
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(userDto);
@@ -244,7 +244,7 @@ describe('UsersService', (): void => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       try {
-        await service.remove(1)
+        await service.remove(1);
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
         expect(e.response).toBe('User not found');
@@ -263,7 +263,7 @@ describe('UsersService', (): void => {
         firstName: null,
         lastName: null,
         created: new Date(),
-        edited: new Date()
+        edited: new Date(),
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(userDto);
@@ -271,7 +271,7 @@ describe('UsersService', (): void => {
       jest.spyOn(prisma.user, 'delete').mockRejectedValue(error);
 
       try {
-        await service.remove(1)
+        await service.remove(1);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
       }
