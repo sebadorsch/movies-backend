@@ -64,8 +64,7 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
   ): Promise<Omit<UserDto, 'password'>> {
     try {
-      const user = await this.usersService.create(createUserDto);
-      return user;
+      return await this.usersService.create(createUserDto);
     } catch (e) {
       throw new ConflictException(`Error`);
     }
