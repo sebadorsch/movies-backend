@@ -24,7 +24,8 @@ export class MoviesService {
   @Cron(CronExpression.EVERY_10_MINUTES)
   async refreshServer(): Promise<void> {
     try{
-      console.log(await axios.get('https://movies-backend-7q1f.onrender.com/'));
+      const res = await axios.get('https://movies-backend-7q1f.onrender.com/')
+      console.log('Refresh the free deployed server -> Status:', res?.status);
     } catch (e) {
       this.logger.error(e);
     }
