@@ -19,6 +19,18 @@ export class MoviesService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Refresh the free deployed server
+   */
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async refreshServer(): Promise<void> {
+    try{
+      console.log(await axios.get('https://movies-backend-7q1f.onrender.com/'));
+    } catch (e) {
+      this.logger.error(e);
+    }
+  }
+
+  /**
    * Update Movies db from external API
    */
   @Cron(CronExpression.EVERY_2_HOURS)
