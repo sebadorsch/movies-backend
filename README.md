@@ -58,6 +58,7 @@ Install dependencies
 Prisma
 
 ```bash
+  npm install @prisma/client
   npx prisma generate
   npm prisma migrate dev --name init
   npm prisma migrate push
