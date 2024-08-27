@@ -239,7 +239,7 @@ describe('MoviesService', (): void => {
         await service.remove(999);
       } catch (e) {
         expect(e).toBeInstanceOf(HttpException);
-        expect(e.response).toBe('Movie not Found' || 'Error deleting movie');
+        expect(e.response).toBe('Error deleting movie');
         expect(e.status).toBe(409);
       }
     });
