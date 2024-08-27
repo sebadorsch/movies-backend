@@ -1,6 +1,7 @@
 import {
   ConflictException,
-  Injectable, Logger,
+  Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';

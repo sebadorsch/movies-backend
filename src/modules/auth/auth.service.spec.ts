@@ -1,12 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UnauthorizedException } from '@nestjs/common';
+import { TokenDto } from './dto/token.dto';
+import { UserDto } from '../users/dto/user.dto';
 
 describe('AuthService', (): void => {
   let authService: AuthService;
   let usersService: UsersService;
+  let jwtService: JwtService;
 
   const mockCreatedUser = {
     id: 1,
@@ -30,28 +35,27 @@ describe('AuthService', (): void => {
     updatedAt: new Date('2024-08-24T17:59:48.623Z'),
   };
 
+  const mockJwtService = () => ({
+    signAsync: jest.fn(),
+    verifyAsync: jest.fn(),
+  });
+
+  const mockUsersService = () => ({
+    get: jest.fn(),
+    create: jest.fn(),
+  });
+
   beforeEach(async (): Promise<void> => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        JwtModule.register({
-          secret: 'test-secret',
-          signOptions: { expiresIn: '60s' },
-        }),
-      ],
       providers: [
         AuthService,
-        {
-          provide: UsersService,
-          useValue: {
-            getByEmail: jest.fn(),
-            create: jest.fn(),
-            get: jest.fn(),
-          },
-        },
+        { provide: JwtService, useFactory: mockJwtService },
+        { provide: UsersService, useFactory: mockUsersService },
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
+    jwtService = module.get<JwtService>(JwtService);
     usersService = module.get<UsersService>(UsersService);
   });
 
@@ -177,6 +181,94 @@ describe('AuthService', (): void => {
       expect(user).toHaveProperty('role');
       expect(user).toHaveProperty('accessToken');
       expect(user).toHaveProperty('refreshToken');
+    });
+  });
+
+  describe('refreshToken', (): void => {
+    it('should refresh the token', async (): Promise<void> => {
+      const mockDecodedToken = {
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+        firstName: 'first',
+        lastName: 'last',
+        iat: 1724612856,
+        exp: 1724699256,
+      };
+
+      const refreshTokenDto: RefreshTokenDto = {
+        refreshToken: 'valid_refresh_token',
+      };
+
+      const mockUser: UserDto = {
+        id: 1,
+        email: 'admin@test.com',
+        password: 'hashed_password',
+        role: 'ADMIN',
+        firstName: 'first',
+        lastName: 'last',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const mockTokenDto: TokenDto = {
+        accessToken: 'new_access_token',
+        refreshToken: 'new_refresh_token',
+      };
+
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValueOnce(mockDecodedToken);
+      jest.spyOn(usersService, 'get').mockResolvedValueOnce([mockUser]);
+      jest.spyOn(jwtService, 'signAsync').mockResolvedValueOnce(mockTokenDto.accessToken)
+        .mockResolvedValueOnce(mockTokenDto.refreshToken);
+
+      const result = await authService.refreshToken(refreshTokenDto);
+
+      expect(jwtService.verifyAsync).toHaveBeenCalledWith(refreshTokenDto.refreshToken);
+      expect(jwtService.signAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          firstName: mockUser.firstName,
+          lastName: mockUser.lastName,
+        }),
+        { expiresIn: '1d' }
+      );
+
+      expect(result).toEqual(mockTokenDto);
+    });
+
+    it('Should fail verifying the token', async (): Promise<void> => {
+      const refreshToken = {
+        refreshToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImZpcnN0TmFtZSI6InNlYmEiLCJsYXN0TmFtZSI6ImRvcnNjaCIsImNyZWF0ZWQiOiIyMDI0LTA4LTI1VDAzOjQ2OjQyLjM2OVoiLCJlZGl0ZWQiOiIyMDI0LTA4LTI1VDA0OjU5OjQzLjIzMFoiLCJpYXQiOjE3MjQ2MTI4NTYsImV4cCI6MTcyNDY5OTI1Nn0.fUuaMSTy9vE37VKevaIEFQnE8enmmfm6PfpKFBW7KmA',
+      };
+
+      try {
+        await authService.refreshToken(refreshToken);
+      } catch (e) {
+        expect(e.status).toEqual(401);
+        expect(e.response).toEqual({
+          message: 'Invalid or expired refresh token',
+          error: 'Unauthorized',
+          statusCode: 401,
+        });
+      }
+    });
+
+    it('should throw UnauthorizedException if user is not found', async (): Promise<void> => {
+      const refreshToken: RefreshTokenDto = {
+        refreshToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkB0ZXN0LmNvbSIsInJvbGUiOiJBRE1JTiIsImZpcnN0TmFtZSI6InNlYmEiLCJsYXN0TmFtZSI6ImRvcnNjaCIsImNyZWF0ZWQiOiIyMDI0LTA4LTI1VDAzOjQ2OjQyLjM2OVoiLCJlZGl0ZWQiOiIyMDI0LTA4LTI1VDA0OjU5OjQzLjIzMFoiLCJpYXQiOjE3MjQ2MTI4NTYsImV4cCI6MTcyNDY5OTI1Nn0.fUuaMSTy9vE37VKevaIEFQnE8enmmfm6PfpKFBW7KmA',
+      };
+      const decodedToken = { email: 'test@example.com' };
+
+      jwtService.verifyAsync = jest.fn().mockResolvedValue(decodedToken);
+      usersService.get = jest.fn().mockResolvedValue([]);
+
+      await expect(authService.refreshToken(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

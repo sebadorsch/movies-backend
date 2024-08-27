@@ -11,8 +11,10 @@ import {
   Injectable,
   NestInterceptor,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -20,7 +22,6 @@ import {
 import { UsersService } from './users.service';
 import { map, Observable } from 'rxjs';
 import * as _ from 'lodash';
-import { GeneralMessageResponseDto } from './dto/general-message-response.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ROLES } from '../auth/guards/roles';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -63,7 +64,8 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
   ): Promise<Omit<UserDto, 'password'>> {
     try {
-      return await this.usersService.create(createUserDto);
+      const user = await this.usersService.create(createUserDto);
+      return user;
     } catch (e) {
       throw new ConflictException(`Error`);
     }
@@ -73,7 +75,10 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get()
   async get(
-    @Body() userParams: Partial<UserDto>,
+    @Query() userParams: Partial<UserDto>,
+    //ToDo:
+    // @Query('orderBy') orderBy?: keyof UserDto,
+    // @Query('orderDirection') orderDirection: 'asc' | 'desc' = 'asc',
   ): Promise<Omit<UserDto, 'password'>[]> {
     return (await this.usersService.get(userParams)) ?? [];
   }
@@ -90,9 +95,9 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   async getById(
-    @Param('id') id: string,
-  ): Promise<Omit<UserDto, 'password'> | GeneralMessageResponseDto> {
-    const user = await this.usersService.getById(+id);
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Omit<UserDto, 'password'> | { message: string }> {
+    const user = await this.usersService.getById(id);
 
     if (_.isEmpty(user)) return { message: 'User not found' };
 
@@ -103,7 +108,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<Omit<UserDto, 'password'>> {
     return this.usersService.update(+id, updateUserDto);
@@ -112,7 +117,7 @@ export class UsersController {
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<UserDto> {
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
     return this.usersService.remove(+id);
   }
 }

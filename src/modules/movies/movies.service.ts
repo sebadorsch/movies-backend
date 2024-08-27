@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MovieDto } from './dto/movie-dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -19,11 +24,11 @@ export class MoviesService {
   @Cron(CronExpression.EVERY_2_HOURS)
   async handleCron(): Promise<void> {
     try {
-      console.log('Cron scheduled every 10 minutes: synchronizing movies from ' + `${process.env.BASE_MOVIES_URL ?? 'https://swapi.dev/api'}/films`);
-
       const {
         data: { results },
-      } = await axios.get(`${process.env.BASE_MOVIES_URL ?? 'https://swapi.dev/api'}/films`);
+      } = await axios.get(
+        `${process.env.BASE_MOVIES_URL ?? 'https://swapi.dev/api'}/films`,
+      );
 
       const existingMovies = await this.prisma.movie.findMany({
         where: {
@@ -68,12 +73,9 @@ export class MoviesService {
       return this.prisma.movie.create({ data: createMovieDto });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error creating movie',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error creating movie',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -92,12 +94,9 @@ export class MoviesService {
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error getting movie',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error getting movie',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -116,12 +115,9 @@ export class MoviesService {
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error getting movie',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error getting movie',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -147,12 +143,9 @@ export class MoviesService {
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error updating movie',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error updating movie',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -166,17 +159,17 @@ export class MoviesService {
    */
   async remove(id: number): Promise<MovieDto> {
     try {
+      if (!(await this.prisma.movie.findUnique({ where: { id } })))
+        throw new ConflictException(`Movie not Found`);
+
       return this.prisma.movie.delete({
         where: { id },
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error deleting movie',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error deleting movie',
+        e.response?.statusCode ?? 409,
       );
     }
   }

@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { getFilterParams, hashPassword } from '../../utils/utils';
 import { UserDto } from './dto/user.dto';
@@ -21,7 +27,7 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<UserDto> {
     try {
       if ((await this.get({ email: user.email })).length)
-        throw new ConflictException(`User already exists!`);
+        throw new ConflictException(`User already exists`);
 
       const isHashed =
         user.password.startsWith('$2b$') || user.password.startsWith('$2a$');
@@ -33,12 +39,9 @@ export class UsersService {
       return await this.prisma.user.create({ data: user });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error creating User',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error creating user',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -52,17 +55,18 @@ export class UsersService {
     try {
       const filters = getFilterParams(filterParams);
 
-      return this.prisma.user.findMany({
+      const users = this.prisma.user.findMany({
         where: filters,
       });
+
+      if (!users) throw new NotFoundException('Users not found');
+
+      return users;
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error getting User',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error getting users',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -76,17 +80,18 @@ export class UsersService {
    */
   async getById(id: number): Promise<UserDto> {
     try {
-      return this.prisma.user.findUnique({
+      const user = this.prisma.user.findUnique({
         where: { id },
       });
+
+      if (!user) throw new NotFoundException('User not found');
+
+      return user;
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error getting User',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error getting user',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -102,7 +107,7 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     try {
       if ((await this.get({ id })).length === 0)
-        throw new ConflictException(`User doesn't exist`);
+        throw new NotFoundException('User not found');
 
       return await this.prisma.user.update({
         where: {
@@ -115,12 +120,9 @@ export class UsersService {
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error updating User',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error updating user',
+        e.response?.statusCode ?? 409,
       );
     }
   }
@@ -134,17 +136,17 @@ export class UsersService {
    */
   async remove(id: number): Promise<UserDto> {
     try {
+      if (!(await this.prisma.user.findUnique({ where: { id } })))
+        throw new NotFoundException('User not found');
+
       return this.prisma.user.delete({
         where: { id },
       });
     } catch (e) {
       this.logger.error(e);
-      return (
-        e.response ?? {
-          message: 'Error getting User',
-          error: 'Conflict',
-          statusCode: 409,
-        }
+      throw new HttpException(
+        e.response?.message ?? 'Error deleting user',
+        e.response?.statusCode ?? 409,
       );
     }
   }

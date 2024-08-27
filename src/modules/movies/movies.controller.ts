@@ -9,6 +9,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -19,6 +21,7 @@ import { MovieDto } from './dto/movie-dto';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { ApiTags } from '@nestjs/swagger';
+import * as _ from 'lodash';
 
 @ApiTags('Movies')
 @UseGuards(AuthGuard, RolesGuard)
@@ -39,21 +42,32 @@ export class MoviesController {
 
   @HttpCode(HttpStatus.OK)
   @Get()
-  async get(@Body() movieParams: Partial<MovieDto>): Promise<MovieDto[]> {
+  async get(
+    @Query() movieParams: Partial<MovieDto>,
+    //ToDo:
+    // @Query('orderBy') orderBy?: keyof MovieDto,
+    // @Query('orderDirection') orderDirection: 'asc' | 'desc' = 'asc',
+  ): Promise<MovieDto[]> {
     return this.moviesService.get(movieParams);
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  async getBtId(@Param('id') id: number): Promise<MovieDto> {
-    return this.moviesService.getById(+id);
+  async getBtId(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<MovieDto | { message: string }> {
+    const movie = await this.moviesService.getById(+id);
+
+    if (_.isEmpty(movie)) return { message: 'movie not found' };
+
+    return movie;
   }
 
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateMovieDto: UpdateMovieDto,
   ): Promise<MovieDto> {
     return this.moviesService.update(+id, updateMovieDto);
@@ -62,7 +76,7 @@ export class MoviesController {
   @Roles(ROLES.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<MovieDto> {
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<MovieDto> {
     return this.moviesService.remove(+id);
   }
 }
