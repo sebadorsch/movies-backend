@@ -124,7 +124,6 @@ describe('UsersController', (): void => {
     });
   });
 
-
   describe('getById', (): void => {
     it('should return a user by id without password', async (): Promise<void> => {
       const id = 1;
